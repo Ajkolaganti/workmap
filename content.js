@@ -1,10 +1,35 @@
-
 let cfg = { maskSensitive: true };
-chrome.storage.sync.get({ maskSensitive: true }, (res) => { cfg = { ...cfg, ...res }; });
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== "sync") return;
-  if (changes.maskSensitive) cfg.maskSensitive = changes.maskSensitive.newValue;
-});
+let extensionActive = true;
+
+// Check if extension context is valid
+function isExtensionContextValid() {
+  try {
+    return chrome.runtime && chrome.runtime.id && extensionActive;
+  } catch (e) {
+    extensionActive = false;
+    return false;
+  }
+}
+
+// Initialize configuration with error handling
+try {
+  chrome.storage.sync.get({ maskSensitive: true }, (res) => { 
+    if (chrome.runtime.lastError) {
+      console.warn('WorkMap: Could not load settings');
+      return;
+    }
+    cfg = { ...cfg, ...res }; 
+  });
+  
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (!isExtensionContextValid()) return;
+    if (area !== "sync") return;
+    if (changes.maskSensitive) cfg.maskSensitive = changes.maskSensitive.newValue;
+  });
+} catch (e) {
+  console.warn('WorkMap: Extension context not available');
+  extensionActive = false;
+}
 
 const MASKED_NAMES = /pass|pwd|secret|token|card|ssn|email|phone/i;
 
@@ -19,7 +44,22 @@ function nowStep(base) {
 }
 
 function send(step) {
-  chrome.runtime.sendMessage({ type: "RECORDER:EVENT", payload: step });
+  if (!isExtensionContextValid()) {
+    console.warn('WorkMap: Extension context invalidated, cannot record step');
+    return;
+  }
+  
+  try {
+    chrome.runtime.sendMessage({ type: "RECORDER:EVENT", payload: step }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.warn('WorkMap: Message sending failed:', chrome.runtime.lastError.message);
+        extensionActive = false;
+      }
+    });
+  } catch (e) {
+    console.warn('WorkMap: Failed to send message:', e.message);
+    extensionActive = false;
+  }
 }
 
 function labelFor(el) {
@@ -80,12 +120,14 @@ function looksRandom(str) { return /[A-Za-z0-9]{6,}/.test(str) && /[0-9]/.test(s
 function cssEscape(s) { return CSS.escape(s); }
 
 function onClick(e) {
+  if (!isExtensionContextValid()) return;
   const el = e.target && e.target.closest && e.target.closest("button,a,[role='button'],input,select,textarea,[onclick]");
   if (!el) return;
   send(nowStep({ action: "click", selector: buildSelector(el), label: labelFor(el) }));
 }
 
 function onChange(e) {
+  if (!isExtensionContextValid()) return;
   const el = e.target;
   if (!el) return;
   if (el instanceof HTMLSelectElement) {
@@ -99,6 +141,7 @@ function onChange(e) {
 }
 
 function onSubmit(e) {
+  if (!isExtensionContextValid()) return;
   const form = e.target;
   send(nowStep({ action: "submit", selector: buildSelector(form), label: form.getAttribute("name") || form.getAttribute("aria-label") || "Form" }));
 }
@@ -106,13 +149,22 @@ function onSubmit(e) {
 function hookSPA() {
   const origPush = history.pushState;
   const origReplace = history.replaceState;
-  function sendNav() { send(nowStep({ action: "navigate" })); }
+  function sendNav() { 
+    if (isExtensionContextValid()) {
+      send(nowStep({ action: "navigate" })); 
+    }
+  }
   history.pushState = function(...args) { const r = origPush.apply(this, args); setTimeout(sendNav, 0); return r; };
   history.replaceState = function(...args) { const r = origReplace.apply(this, args); setTimeout(sendNav, 0); return r; };
   window.addEventListener("popstate", sendNav);
 }
 
-window.addEventListener("click", onClick, true);
-window.addEventListener("change", onChange, true);
-window.addEventListener("submit", onSubmit, true);
-hookSPA();
+// Only attach event listeners if extension context is valid
+if (isExtensionContextValid()) {
+  window.addEventListener("click", onClick, true);
+  window.addEventListener("change", onChange, true);
+  window.addEventListener("submit", onSubmit, true);
+  hookSPA();
+} else {
+  console.warn('WorkMap: Extension context not available, step recording disabled');
+}
