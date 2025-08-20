@@ -191,6 +191,13 @@ function stepsToPdfHtml(steps) {
         size: A4;
       }
       
+      @media print {
+        body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+        .step { break-inside: avoid; page-break-inside: avoid; }
+        .header { break-after: avoid; page-break-after: avoid; }
+        .summary { break-after: avoid; page-break-after: avoid; }
+      }
+      
       * {
         box-sizing: border-box;
       }
@@ -371,11 +378,6 @@ function stepsToPdfHtml(steps) {
         font-size: 12px;
         border-top: 1px solid #e2e8f0;
         margin-top: 40px;
-      }
-      
-      @media print {
-        body { print-color-adjust: exact; }
-        .step { break-inside: avoid; }
       }
     </style>
   </head>

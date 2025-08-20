@@ -78,6 +78,52 @@ toggleBtn.onclick = async () => {
   }
 };
 
+// PDF Generation Function
+async function generateAndDownloadPDF(html) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Create a temporary window for PDF generation
+      const printWindow = window.open('', '_blank', 'width=1200,height=800');
+      
+      if (!printWindow) {
+        throw new Error('Could not open print window. Please allow popups for this extension.');
+      }
+
+      // Write the HTML content to the new window
+      printWindow.document.write(html);
+      printWindow.document.close();
+
+      // Wait for content to load, then trigger print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          // Configure print settings for PDF
+          printWindow.print();
+          
+          // Close the window after a short delay
+          setTimeout(() => {
+            printWindow.close();
+            resolve();
+          }, 1000);
+        }, 500);
+      };
+
+      // Fallback if onload doesn't fire
+      setTimeout(() => {
+        if (printWindow && !printWindow.closed) {
+          printWindow.print();
+          setTimeout(() => {
+            printWindow.close();
+            resolve();
+          }, 1000);
+        }
+      }, 2000);
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 // PDF Export Functions
 document.getElementById("exportPdf").onclick = async () => {
   try {
@@ -94,9 +140,9 @@ document.getElementById("downloadPdf").onclick = async () => {
   try {
     const { html } = await chrome.runtime.sendMessage({ type: "RECORDER:EXPORT_PDF" });
     if (html) {
-      // Create a blob and download as HTML that can be printed as PDF
-      downloadBlob(new Blob([html], { type: "text/html;charset=utf-8" }), "workmap-workflow.html");
-      showToast("PDF HTML downloaded (print to save as PDF)");
+      // Generate and download actual PDF
+      await generateAndDownloadPDF(html);
+      showToast("PDF generated and downloaded");
     } else {
       showToast("No steps to export");
     }
