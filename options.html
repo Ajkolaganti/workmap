@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step Recorder – Options</title>
+    <style>
+      body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 16px; max-width: 720px; }
+      h2 { margin-top: 0; }
+      label { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      input[type="checkbox"] { transform: scale(1.2); }
+      .muted { color: #64748b; font-size: 13px; }
+      .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; margin: 12px 0; }
+      button { padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; }
+      button:hover { box-shadow: 0 4px 18px rgba(20,184,166,.12); transform: translateY(-1px); }
+    </style>
+  </head>
+  <body>
+    <h2>Step Recorder – Options</h2>
+    <div class="card">
+      <label><input id="captureScreenshots" type="checkbox"> Capture screenshots on clicks/submits</label>
+      <div class="muted">Screenshots are captured from the visible tab and embedded in Word/Markdown notes when available.</div>
+    </div>
+    <div class="card">
+      <label><input id="maskSensitive" type="checkbox"> Mask sensitive inputs (passwords, tokens, emails, phones)</label>
+      <div class="muted">Heuristic masking based on field name/type. Actual values are not stored when enabled.</div>
+    </div>
+    <div class="card">
+      <button id="save">Save</button>
+      <span id="status" class="muted"></span>
+    </div>
+    <div class="muted">Tip: Use <b>Ctrl + Shift + R</b> to toggle recording from any tab.</div>
+    <script src="options.js"></script>
+  </body>
+</html>

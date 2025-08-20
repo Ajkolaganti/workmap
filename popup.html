@@ -1,0 +1,416 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkMap</title>
+    <style>
+      :root {
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #141414;
+        --bg-tertiary: #1f1f1f;
+        --bg-card: rgba(25, 25, 25, 0.95);
+        --bg-glass: rgba(20, 20, 20, 0.8);
+        --text-primary: #ffffff;
+        --text-secondary: #b3b3b3;
+        --text-muted: #666666;
+        --accent-primary: #6366f1;
+        --accent-secondary: #06d6a0;
+        --accent-danger: #ef4444;
+        --accent-success: #10b981;
+        --accent-warning: #f59e0b;
+        --border-glass: rgba(255, 255, 255, 0.12);
+        --border-subtle: rgba(255, 255, 255, 0.06);
+        --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+        --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.2);
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.25);
+      }
+      
+      * { 
+        box-sizing: border-box; 
+        margin: 0;
+        padding: 0;
+      }
+      
+      body { 
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        min-width: 400px; 
+        min-height: 550px;
+        color: var(--text-primary);
+        background: radial-gradient(circle at 20% 80%, #1a1a2e 0%, #16213e 25%, #0f1419 100%);
+        overflow-x: hidden;
+      }
+      
+      header { 
+        position: relative;
+        padding: 24px 20px;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border-bottom: 1px solid var(--border-glass);
+        box-shadow: var(--shadow-glass);
+      }
+      
+      header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(6, 214, 160, 0.8));
+        backdrop-filter: blur(10px);
+        z-index: -1;
+      }
+      
+      .header-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .logo {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        backdrop-filter: blur(10px);
+      }
+      
+      .header-text {
+        flex: 1;
+      }
+      
+      .title { 
+        font-weight: 700; 
+        font-size: 20px; 
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2px;
+      }
+      
+      .subtitle {
+        font-size: 13px;
+        opacity: 0.85;
+        font-weight: 400;
+      }
+      
+      .container { 
+        padding: 20px; 
+      }
+      
+      .card { 
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow-soft);
+        position: relative;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+      
+      .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      }
+      
+      .status-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 214, 160, 0.05));
+        border-color: rgba(99, 102, 241, 0.2);
+      }
+      
+      .row { 
+        display: flex; 
+        gap: 12px; 
+        align-items: center; 
+        flex-wrap: wrap; 
+      }
+      
+      .status-row {
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      
+      .btn { 
+        padding: 12px 18px;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 14px;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow);
+        border-color: var(--border-glass);
+      }
+      
+      .btn:hover::before {
+        opacity: 1;
+      }
+      
+      .btn:active {
+        transform: translateY(0);
+      }
+      
+      .btn.primary { 
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border-color: var(--accent-primary);
+        color: white;
+        font-weight: 600;
+      }
+      
+      .btn.primary:hover {
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+      }
+      
+      .btn-sm {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      
+      .pill { 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 8px; 
+        padding: 8px 14px; 
+        border-radius: 999px; 
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-subtle);
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+      
+      .dot { 
+        width: 10px; 
+        height: 10px; 
+        border-radius: 50%; 
+        background: var(--accent-success);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+        position: relative;
+      }
+      
+      .dot.red { 
+        background: var(--accent-danger);
+        animation: pulse 2s infinite;
+        box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+      }
+      
+      @keyframes pulse { 
+        0% { 
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7), 0 0 16px rgba(239, 68, 68, 0.6);
+        } 
+        70% { 
+          box-shadow: 0 0 0 12px rgba(239, 68, 68, 0), 0 0 16px rgba(239, 68, 68, 0.6);
+        } 
+        100% { 
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 0 16px rgba(239, 68, 68, 0.6);
+        } 
+      }
+      
+      .export-grid { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 12px; 
+      }
+      
+      .export-grid .btn {
+        text-align: center;
+        min-height: 44px;
+      }
+      
+      .hotkey {
+        font-size: 11px;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+        border: 1px solid var(--border-subtle);
+      }
+      
+      .muted { 
+        color: var(--text-muted); 
+        font-size: 12px; 
+        line-height: 1.4;
+      }
+      
+      .muted a {
+        color: var(--accent-secondary);
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+      
+      .muted a:hover {
+        color: var(--text-secondary);
+      }
+      
+      .last-action {
+        margin-top: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        font-size: 12px;
+      }
+      
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .badge {
+        background: var(--accent-primary);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .toast { 
+        position: fixed; 
+        right: 16px; 
+        bottom: 16px; 
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-glass);
+        color: var(--text-primary);
+        padding: 12px 16px; 
+        border-radius: 12px; 
+        font-size: 13px; 
+        opacity: 0; 
+        transform: translateY(10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--shadow-glass);
+        z-index: 1000;
+      }
+      
+      .toast.show { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+      
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 3px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <div class="logo">W</div>
+        <div class="header-text">
+          <div class="title">WorkMap</div>
+          <div class="subtitle">Visual Workflow Recording</div>
+        </div>
+      </div>
+    </header>
+    
+    <div class="container">
+      <div class="card status-card">
+        <div class="row status-row">
+          <div class="row">
+            <span id="recDot" class="dot"></span>
+            <div id="recText" class="pill">
+              <b id="recState">Idle</b> · <span id="count">0</span> steps
+            </div>
+          </div>
+          <button id="toggle" class="btn primary">Start Recording</button>
+        </div>
+        <div class="row" style="justify-content: space-between; align-items: center;">
+          <div class="muted">Hotkey:</div>
+          <div class="hotkey">Ctrl + Shift + R</div>
+        </div>
+        <div id="last" class="last-action muted" style="display: none;"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          Export Options
+          <span class="badge">PDF</span>
+        </div>
+        <div class="export-grid">
+          <button id="exportPdf" class="btn">📄 Export PDF</button>
+          <button id="downloadPdf" class="btn">📥 Download PDF</button>
+          <button id="exportMd" class="btn">📝 Copy Markdown</button>
+          <button id="downloadMd" class="btn">📥 Download .md</button>
+          <button id="exportJson" class="btn">🔧 Copy JSON</button>
+          <button id="downloadJson" class="btn">📥 Download .json</button>
+          <button id="downloadDoc" class="btn" style="grid-column: span 2;">📄 Download Word (.doc)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">
+          <div>Settings: <a href="options.html" target="_blank">Configure WorkMap</a></div>
+          <div style="margin-top: 8px; font-size: 11px; opacity: 0.7;">
+            v0.5.0 • Records clicks, inputs, navigation & more
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast">Action completed</div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
